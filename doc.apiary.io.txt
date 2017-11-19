@@ -1,0 +1,266 @@
+FORMAT: 1A
+HOST: http://api.optmiz.me
+
+# Optmiz API
+
+Optmiz is a simple API allowing consumers to manage folders, files, and images in your repository.
+You have to put a JWT token in your headers to request a token refer to user.optmiz.it API.
+
+## filetree [/filetree/]
+
+### List directory [POST]
+Get level and list of subdirectories for a directory
+It takes a JSON object containing a directory and options.
+
++ JSON Body Parameter
+    + dir: (optional,string) - directory you want to retrieve
+    + onlyFolder: (optional,boolean) - retreive only folder, not files
+    + onlyFile: (optional,boolean) - retreive only files, not folders
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXBvc2l0b3J5IjoicmVwbzEiLCJuYW1lIjoibGt1dWx1IiwiYWRtaW4iOnRydWUsInR0bCI6MTQ5NTUyOTk2OX0.MDrX3twVpqoGuYj--Jm0TI2f_qJOHHDiZkCzeruky0A
+
+    + Body
+
+            {
+                "dir": "/",
+                "onlyFolders": true,
+                "onlyFiles":false
+            }
+
++ Response 200
+
+        {
+            "info": {
+                        "level": 1          // (integer) Count of directory level from the root
+                    },
+            "folders":[
+                {
+                    "rel": "/dir1/subdir1", // (string) full directory path from the root node
+                    "name": "subdir1",      // (string) folder name
+                    "hasSubDir": true       // (boolean) this folder contains one or more subdirectory
+                },
+                {
+                    "rel": "/dir1/subdir2",
+                    "name": "subdir2",
+                    "hasSubDir": false
+                }
+            ]
+        }
+
++ Response 401
+
+    Authentication error
+
+## file [/file/{path}]
+
+### List files [GET]
+Get folder file list
+
++ parameters
+    + path: path/to (required, string) - path to directory
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXBvc2l0b3J5IjoicmVwbzEiLCJuYW1lIjoibGt1dWx1IiwiYWRtaW4iOnRydWUsInR0bCI6MTQ5NTUyOTk2OX0.MDrX3twVpqoGuYj--Jm0TI2f_qJOHHDiZkCzeruky0A
+
++ Response 200 (application/json)
+
+    + Body
+
+            [
+                {
+                    "type": "file",             // "file" or "dir"
+                    "path": "path/to/image.png",// full file path
+                    "timestamp": 1495438149,    // Created at timestamp
+                    "size": 1651131,            // file size in bytes
+                    "dirname": "path/to",       // path to file
+                    "basename": "image.png",    // filename and extension
+                    "extension": "png",         // file extension
+                    "filename": "image"         // filename w/o extension
+                },
+                {
+                    "type": "file",
+                    "path": "path/to/2nd-image.png",
+                    "timestamp": 1511088606,
+                    "size": 1513,
+                    "dirname": "",
+                    "basename": "2nd-image.png",
+                    "extension": "png",
+                    "filename": "2nd-image"
+                }
+            ]
+
++ Response 404
+
+        Not found
+
++ Response 401
+
+        Authentication error
+
+
+
+### Move file or folder [PUT]
+Move/rename file or folder
+
++ parameters
+    + path: path/to (required, string) - path to directory or path to file
+
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXBvc2l0b3J5IjoicmVwbzEiLCJuYW1lIjoibGt1dWx1IiwiYWRtaW4iOnRydWUsInR0bCI6MTQ5NTUyOTk2OX0.MDrX3twVpqoGuYj--Jm0TI2f_qJOHHDiZkCzeruky0A
+
++ Response 204 (application/json)
+
+
+### Delete file or folder [DELETE]
+
+delete file or folder
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXBvc2l0b3J5IjoicmVwbzEiLCJuYW1lIjoibGt1dWx1IiwiYWRtaW4iOnRydWUsInR0bCI6MTQ5NTUyOTk2OX0.MDrX3twVpqoGuYj--Jm0TI2f_qJOHHDiZkCzeruky0A
+
++ Response 204 (application/json)
+
+
+### Create folder [POST]
+
+Create folder
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXBvc2l0b3J5IjoicmVwbzEiLCJuYW1lIjoibGt1dWx1IiwiYWRtaW4iOnRydWUsInR0bCI6MTQ5NTUyOTk2OX0.MDrX3twVpqoGuYj--Jm0TI2f_qJOHHDiZkCzeruky0A
+
++ Response 201 (application/json)
+
++ Response 400 (application/json)
+
+## image [/image/{path}]
+
+### File detail [GET]
+Get Image file detail and metadata:
+returns
+- "file": file object containing filesystem informations
+- "size": image size, mime-type and color depth
+- "crops" : coordinates by preset
+    * depends on applicative settings each preset is define by this structure:
+        > { "preset name" :
+        >    {
+        >        "x": "561",
+        >        "y": "292",
+        >        "w": "1029",
+        >        "h": "579"
+        >    }}
+- "poi" : Coordinate of the Point Of Interest
+    * structured like
+        > "poi": {
+        >   "x": "868",
+        >   "y": "226"
+        >  }
+
++ parameters
+    + path: path/to (required, string) - path to image file
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXBvc2l0b3J5IjoicmVwbzEiLCJuYW1lIjoibGt1dWx1IiwiYWRtaW4iOnRydWUsInR0bCI6MTQ5NTUyOTk2OX0.MDrX3twVpqoGuYj--Jm0TI2f_qJOHHDiZkCzeruky0A
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+                "path": "path/to/image.png",
+                "file": {
+                    "type": "file",             // "file" or "dir"
+                    "path": "path/to/image.png",// full file path
+                    "timestamp": 1495438149,    // Created at timestamp
+                    "size": 1651131,            // file size in bytes
+                    "dirname": "path/to",       // path to file
+                    "basename": "image.png",    // filename and extension
+                    "extension": "png",         // file extension
+                    "filename": "image"         // filename w/o extension
+                },
+                "size": {
+                    "0": 1809,  // width
+                    "1": 1022,  // height
+                    "2": 3,     // image type
+                    "3": "width=\"1809\" height=\"1022\"",
+                    "bits": 8, // color depth
+                    "mime": "image/png"
+                },
+                "crops": { // Array of ratios
+                    "large": { // ratio definition
+                        "x": "561",
+                        "y": "292",
+                        "w": "1029",
+                        "h": "579"
+                    },
+                    "landscape": { // ratio definition
+                        "x": "441",
+                        "y": "242",
+                        "w": "877",
+                        "h": "658"
+                    }
+                },
+                "poi": { // point of interest coordinates
+                    "x": "868",
+                    "y": "226"
+                }
+            }
+
++ Response 404
+
+        Not found
+
++ Response 401
+
+        Authentication error
+
+
+### Update file details [PATCH]
+Update file metadata like:
+- POI
+- Cropping coordinates
+
++ parameters
+    + path: path/to (required, string) - path to image file
+
++ Request (application/json)
+
+    + Headers
+
+            Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyZXBvc2l0b3J5IjoicmVwbzEiLCJuYW1lIjoibGt1dWx1IiwiYWRtaW4iOnRydWUsInR0bCI6MTQ5NTUyOTk2OX0.MDrX3twVpqoGuYj--Jm0TI2f_qJOHHDiZkCzeruky0A
+
++ Response 200 (application/json)
+
+    + Body
+
+            {
+            }
+
+
++ Response 404
+
+        Not found
+
++ Response 401
+
+        Authentication error
+
